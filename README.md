@@ -1,4 +1,4 @@
-# **Analisis Predictivo**
+# Analisis Predictivo
 
 ## *Examen 1*
 
