@@ -1,6 +1,6 @@
-# *Analisis Predictivo*
+# **Analisis Predictivo**
 
-## Examen 1
+## *Examen 1*
 
 - [Dataset](https://archive.ics.uci.edu/ml/datasets/Wine+Quality)
 
