@@ -6,11 +6,6 @@ output:
   pdf_document: default
   html_document: default
 ---
-```{r}
-rm(list=ls())
-gc()
-```
-
 
 ANALISIS EXPLORATORIO
 
@@ -96,7 +91,6 @@ names(s)
 ```{r}
 s = s %>%mutate(Donante = Category)
 s = s %>% mutate(Donante = case_when(Donante == "Blood Donor"~ "Donante", Donante == "Hepatitis" ~ "No Donante", Donante == "Fibrosis" ~ "No Donante", Donante == "Cirrhosis" ~ "No Donante"))
-
 ```
 
 
@@ -127,7 +121,6 @@ View(s)
 c = s %>% distinct(Category, .keep_all = TRUE)
 View(c)
 ```
-
 
 ```{r}
 no_donante = filter(s,Donante == "No Donante")
@@ -219,8 +212,6 @@ ggplot(data = s, aes(x = Donante, y = PROT, fill = Donante)) +
        ggtitle("PROT") + theme(plot.title = element_text(hjust = 0.5))
 ```
 
-
-
 ```{r}
 boxplot(s$ALB ~ s$Donante ,main="Outliers",xlab = "", ylab = "ALB")
 boxplot(s$ALP ~ s$Donante,main="Outliers",xlab = "", ylab = "ALP")
@@ -247,22 +238,17 @@ boxplot(no_donante$GGT ~ no_donante$Category,main="Outliers",xlab = "Categoria",
 boxplot(no_donante$PROT~ no_donante$Category,main="Outliers",xlab = "Categoria", ylab = "PROT")
 ```
 
-
-
 Calculos sobre algunas medidas:
 
 ```{r}
 summary(s)
 ```
-
 ------------------------------------------------------------------
 
 VISUALIZACIONES
 ```{r}
 library(ggplot2)
 ```
-
-
 
 Mostrar la distribucion de los valores:
 
@@ -610,7 +596,6 @@ library(ggpubr)
 library(rstatix)
 ```
 
-
 ```{r}
 install.packages("pwr")
 library(pwr)
@@ -691,9 +676,6 @@ GGally::ggcorr(
   label=T, hjust=1, label_size=2, layout.exp=10, size=3)
 ```
 
-
-
-
 ------------------------------------------------------------------
 TEST - TRAIN
 
@@ -734,7 +716,6 @@ View(entreno)
 View(testeo)
 ```
 
-
 ```{r}
 #Creacion modelo
 library(rpart)
@@ -748,12 +729,7 @@ rpart.plot(arbol, extra = 1, type=5, main= "Arbol de Decision")
 ```
 
 ```{r}
-summary(entreno) 
-
-```
-
-```{r}
-#Testear el modelo. Sirve el arbol?
+#Testear el modelo.
 pred = predict(arbol, testeo, type="class")
 confusionMatrix(pred,testeo$Donante)
 ```
