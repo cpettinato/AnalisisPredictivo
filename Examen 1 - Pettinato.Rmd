@@ -1,0 +1,759 @@
+---
+title: "Análisis Predictivo - Examen 1"
+author: "Camila Pettinato"
+date: "3/25/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+rm(list=ls())
+gc()
+```
+
+
+ANALISIS EXPLORATORIO
+
+```{r}
+library(readr)
+library(dplyr)
+```
+
+```{r}
+sangre <- read_csv("hcvdat0.csv")
+View(sangre)
+```
+
+```{r}
+d = sangre %>% distinct(Category, .keep_all = TRUE)
+View(d)
+```
+
+
+Arreglar las columnas
+
+```{r}
+s = sangre
+s = s %>% mutate(Category= case_when(Category == "0=Blood Donor"~"Blood Donor",Category == "0s=suspect Blood Donor" ~ "Suspect Blood Donor" ,Category == "1=Hepatitis" ~ "Hepatitis", Category == "2=Fibrosis" ~ "Fibrosis", Category == "3=Cirrhosis" ~ "Cirrhosis"))
+```
+
+Variables:
+
+```{r}
+glimpse(s)
+head(s,4)
+names(s)
+str(s)
+```
+
+- ALB: mide la cantidad de albúmina en la sangre. La albúmina es una proteína producida por el hígado. Los niveles de albúmina bajos podrían indicar un problema del hígado o los riñones. (34 - 54 g/L)
+
+- ALP: mide la cantidad de la enzima fosfatasa alcalina en la sangre. Las elevaciones en ALP pueden indicar un problema con el hígado, la vesícula biliar, los conductos biliares, los huesos o algunos otros sistemas de órganos. Bajos niveles pueden indicar: hipotiroidismo, enfermedad de wilson, Deficiencia de zinc, Anemia perniciosa, Enfermedad celíaca, Hipofosfatasia congénitaPrendaPrenda (25-200 U/L)
+
+- ALT: ALT es una enzima que se encuentra principalmente en el hígado. Cuando las células hepáticas están dañadas, liberan esta enzima en el torrente sanguíneo. La prueba de ALT mide el nivel de ALT en la sangre. Los niveles elevados de ALT en la sangre pueden detectar un problema en el hígado antes de tener signos de una enfermedad hepática como ictericia, que hace que la piel y los ojos se tornen amarillentos. La prueba de sangre de ALT permite la detección temprana de enfermedades del hígado.(H: 7 - 50 U/L y M:7-35 U/L)
+
+- AST: La AST (aspartato aminotransferasa) es una enzima que se encuentra principalmente en el hígado, pero también en los músculos. Cuando el hígado está dañado, libera AST en el torrente sanguíneo. La prueba de sangre de AST mide la cantidad de AST que hay en la sangre. Permite que el médico diagnostique daño o enfermedad del hígado. Los niveles elevados de AST en la sangre pueden indicar hepatitis, cirrosis, mononucleosis u otras enfermedades del hígado. También pueden indicar problemas cardíacos o pancreatitis. (H: 5 - 50 U/L y M:7-35 U/L)
+
+- BIL: Es un examen que mide los niveles de bilirrubina en la sangre. La bilirrubina es una sustancia amarillenta que se forma durante el proceso normal de descomposición de los glóbulos rojos por el cuerpo. La bilirrubina se encuentra en la bilis, un líquido segregado por el hígado que ayuda a digerir los alimentos. Cuando el hígado funciona normalmente, elimina la mayoría de la bilirrubina del cuerpo. Si el hígado está dañado, la bilirrubina puede salirse del hígado y pasar a la sangre. El exceso de bilirrubina en la sangre puede provocar ictericia, que hace que la piel y los ojos se vuelvan amarillos. La aparición de ictericia y el examen de bilirrubina en sangre permiten que su médico o profesional de la salud determine si usted tiene una enfermedad del hígado. (0.3-1.9 mg/dl)
+
+- CHE: Es un análisis de sanbre que estudia los niveles de 2 sustancias que ayudan al sistema nervioso a funcionar apropiadamente. Dichas sustancias se llaman acetilcolinesterasa y seudocolinesterasa. Los nervios necesitan estas sustancias para enviar señales. 8 a 18 unidades por mililitro (U/mL) o 8 a 18 kilounidades por litro (KU/L).
+
+- CHOL: El colesterol total debe estar siempre por debajo de 190 mg/dL. Tener el colesterol total alto no significa siempre que la persona está enferma, ya que puede ocurrir un aumento de colesterol bueno HDL, lo que también hace que se eleve el valor del colesterol total. Así que se deben tomar siempre en consideración lo valores del colesterol HDL (bueno), del colesterol LDL (malo) y de los triglicéridos para analizar el riesgo que la persona tiene de desarrollar enfermedades cardiovasculares.
+
+- CREA: Es una prueba que mide los niveles de creatinina en la sangre o en la orina. La creatinina es un producto de desecho generado por los músculos como parte de la actividad diaria. Normalmente, los riñones filtran la creatinina de la sangre y la expulsan del cuerpo por la orina. Cuando hay un problema con los riñones, la creatinina se puede acumular en la sangre y sale menos por la orina. Los niveles anormales de creatinina en la sangre o en la orina pueden ser signo de enfermedad renal.
+
+- GGT: La GGT (Gamma Glutamil Transpeptidasa) es una enzima involucrada en el transporte de los aminoácidos a las células y en el metabolismo del glutatión, un antioxidante que ayuda al organismo a eliminar sustancia tóxicas, regular el sistema inmunitario o reparar el daño celular.
+Hombres adultos: 8 - 55 U/L
+Mujeres adultas: 5 - 38 U/L
+
+- PROT: El examen de proteína total mide la cantidad total de dos clases de proteínas encontradas en la porción líquida de la sangre: albúmina y globulina. 
+Las proteínas son partes importantes de todas las células y tejidos.
+        La albúmina ayuda a impedir que se escape líquido de los vasos sanguíneos. También transporta químicos a través         de su sangre.
+        Las globulinas son una parte importante del sistema inmunitario.
+60 a 83 g/L.
+
+Filtrar variables que no sean significativas:
+-  ...1 = como es una variable que enumera las personas que donaron sangre. Para hacer la prediccion no me sirve ya que el modelo lo va a tomar que estan enumeradas por el mas importante al menos
+
+```{r}
+s$...1 = NULL
+```
+
+Filtro la categoria de Blood Suspect
+
+```{r}
+s = filter(s,Category=="Blood Donor" | Category =="Hepatitis"| Category == "Fibrosis"| Category == "Cirrhosis")
+```
+
+
+Agregar columna Donate?: Blood Donor = Donate y sino No es donante:
+
+```{r}
+names(s)
+```
+
+
+```{r}
+s = s %>%mutate(Donante = Category)
+s = s %>% mutate(Donante = case_when(Donante == "Blood Donor"~ "Donante", Donante == "Hepatitis" ~ "No Donante", Donante == "Fibrosis" ~ "No Donante", Donante == "Cirrhosis" ~ "No Donante"))
+
+```
+
+
+
+Missing Values:
+
+Ver cuantos registros vacios tengo
+```{r}
+sapply(s, function(x) sum(is.na(x)))
+```
+
+Que hago con los NAs:
+1. Los dejo porque no son muchos
+2. Los filtro
+
+```{r}
+s = s[!is.na(s$ALB),]
+s = s[!is.na(s$ALP),]
+s = s[!is.na(s$ALT),]
+s = s[!is.na(s$CHOL),]
+```
+
+```{r}
+View(s)
+```
+
+```{r}
+c = s %>% distinct(Category, .keep_all = TRUE)
+View(c)
+```
+
+
+```{r}
+no_donante = filter(s,Donante == "No Donante")
+```
+
+Ver si la base tiene outliers: hay que ver los parametros normales para ver si son outliers
+
+```{r}
+library(ggplot2)
+
+ggplot(data = s, aes(x = Donante, y = ALB, fill = Donante)) +
+       stat_boxplot(geom = "errorbar",
+                    width = 0.2) +
+       geom_boxplot(outlier.colour = "black") +
+       scale_y_continuous(name = "ALB") + 
+       scale_x_discrete(name = "") +       
+       ggtitle("ALB") + theme(plot.title = element_text(hjust = 0.5))     
+
+ggplot(data = s, aes(x = Donante, y = ALP, fill = Donante)) +
+       stat_boxplot(geom = "errorbar",
+                    width = 0.2) +
+       geom_boxplot(outlier.colour = "black") +
+       scale_y_continuous(name = "ALP") + 
+       scale_x_discrete(name = "") +       
+       ggtitle("ALP") + theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data = s, aes(x = Donante, y = ALT, fill = Donante)) +
+       stat_boxplot(geom = "errorbar",
+                    width = 0.2) +
+       geom_boxplot(outlier.colour = "black") +
+       scale_y_continuous(name = "ALT") + 
+       scale_x_discrete(name = "") +       
+       ggtitle("ALT") + theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data = s, aes(x = Donante, y = AST, fill = Donante)) +
+       stat_boxplot(geom = "errorbar",
+                    width = 0.2) +
+       geom_boxplot(outlier.colour = "black") +
+       scale_y_continuous(name = "AST") + 
+       scale_x_discrete(name = "") +       
+       ggtitle("AST") + theme(plot.title = element_text(hjust = 0.5))     
+
+ggplot(data = s, aes(x = Donante, y = BIL, fill = Donante)) +
+       stat_boxplot(geom = "errorbar",
+                    width = 0.2) +
+       geom_boxplot(outlier.colour = "black") +
+       scale_y_continuous(name = "BIL") + 
+       scale_x_discrete(name = "") +       
+       ggtitle("BIL") + theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data = s, aes(x = Donante, y = CHE, fill = Donante)) +
+       stat_boxplot(geom = "errorbar",
+                    width = 0.2) +
+       geom_boxplot(outlier.colour = "black") +
+       scale_y_continuous(name = "CHE") + 
+       scale_x_discrete(name = "") +       
+       ggtitle("CHE") + theme(plot.title = element_text(hjust = 0.5)) 
+
+ggplot(data = s, aes(x = Donante, y = CHOL, fill = Donante)) +
+       stat_boxplot(geom = "errorbar",
+                    width = 0.2) +
+       geom_boxplot(outlier.colour = "black") +
+       scale_y_continuous(name = "CHOL") + 
+       scale_x_discrete(name = "") +       
+       ggtitle("CHOL") + theme(plot.title = element_text(hjust = 0.5))     
+
+ggplot(data = s, aes(x = Donante, y = CREA, fill = Donante)) +
+       stat_boxplot(geom = "errorbar",
+                    width = 0.2) +
+       geom_boxplot(outlier.colour = "black") +
+       scale_y_continuous(name = "CREA") + 
+       scale_x_discrete(name = "") +       
+       ggtitle("CREA") + theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data = s, aes(x = Donante, y = GGT, fill = Donante)) +
+       stat_boxplot(geom = "errorbar",
+                    width = 0.2) +
+       geom_boxplot(outlier.colour = "black") +
+       scale_y_continuous(name = "GGT") + 
+       scale_x_discrete(name = "") +       
+       ggtitle("GGT") + theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data = s, aes(x = Donante, y = PROT, fill = Donante)) +
+       stat_boxplot(geom = "errorbar",
+                    width = 0.2) +
+       geom_boxplot(outlier.colour = "black") +
+       scale_y_continuous(name = "PROT") + 
+       scale_x_discrete(name = "") +       
+       ggtitle("PROT") + theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+
+```{r}
+boxplot(s$ALB ~ s$Donante ,main="Outliers",xlab = "", ylab = "ALB")
+boxplot(s$ALP ~ s$Donante,main="Outliers",xlab = "", ylab = "ALP")
+boxplot(s$ALT ~ s$Donante,main="Outliers",xlab = "", ylab = "ALT")
+boxplot(s$AST ~ s$Donante,main="Outliers",xlab = "", ylab = "AST")
+boxplot(s$BIL ~ s$Donante,main="Outliers",xlab = "", ylab = "BIL")
+boxplot(s$CHE ~ s$Donante,main="Outliers",xlab = "", ylab = "CHE")
+boxplot(s$CHOL ~ s$Donante,main="Outliers",xlab = "", ylab = "CHOL")
+boxplot(s$CREA~ s$Donante,main="Outliers",xlab = "", ylab = "CREA")
+boxplot(s$GGT ~ s$Donante,main="Outliers",xlab = "", ylab = "GGT")
+boxplot(s$PROT~ s$Donante,main="Outliers",xlab = "", ylab = "PROT")
+```
+
+```{r}
+boxplot(no_donante$ALB ~ no_donante$Category,main="Outliers",xlab = "Categoria", ylab = "ALB")
+boxplot(no_donante$ALP ~ no_donante$Category,main="Outliers",xlab = "Categoria", ylab = "ALP")
+boxplot(no_donante$ALT ~ no_donante$Category,main="Outliers",xlab = "Categoria", ylab = "ALT")
+boxplot(no_donante$AST ~ no_donante$Category,main="Outliers",xlab = "Categoria", ylab = "AST")
+boxplot(no_donante$BIL ~ no_donante$Category,main="Outliers",xlab = "Categoria", ylab = "BIL")
+boxplot(no_donante$CHE ~ no_donante$Category,main="Outliers",xlab = "Categoria", ylab = "CHE")
+boxplot(no_donante$CHOL ~ no_donante$Category,main="Outliers",xlab = "Categoria", ylab = "CHOL")
+boxplot(no_donante$CREA~ no_donante$Category,main="Outliers",xlab = "Categoria", ylab = "CREA")
+boxplot(no_donante$GGT ~ no_donante$Category,main="Outliers",xlab = "Categoria", ylab = "GGT")
+boxplot(no_donante$PROT~ no_donante$Category,main="Outliers",xlab = "Categoria", ylab = "PROT")
+```
+
+
+
+Calculos sobre algunas medidas:
+
+```{r}
+summary(s)
+```
+
+------------------------------------------------------------------
+
+VISUALIZACIONES
+```{r}
+library(ggplot2)
+```
+
+
+
+Mostrar la distribucion de los valores:
+
+```{r}
+Conf2x5 = matrix(c(1:10), nrow=2, byrow=TRUE)
+Conf2x5
+layout(Conf2x5)
+layout.show(10)
+
+hist(s$ALB,main=" ",xlab = "ALB", ylab = "Frecuencia")
+hist(s$ALP,main=" ",xlab = "ALP", ylab = "Frecuencia")
+hist(s$ALT,main=" ",xlab = "ALT", ylab = "Frecuencia")
+hist(s$AST,main=" ",xlab = "AST", ylab = "Frecuencia")
+hist(s$BIL,main=" ",xlab = "BIL", ylab = "Frecuencia")
+hist(s$CHE,main=" ",xlab = "CHE", ylab = "Frecuencia")
+hist(s$CHOL,main=" ",xlab = "CHOL", ylab = "Frecuencia")
+hist(s$CREA,main=" ",xlab = "CREA", ylab = "Frecuencia")
+hist(s$GGT,main=" ",xlab = "GGT", ylab = "Frecuencia")
+hist(s$PROT,main=" ",xlab = "PROT", ylab = "Frecuencia")
+
+```
+
+ver como se estan distribuidos los datos en base a si son donante o no.
+```{r}
+ggplot(s) +
+  aes(x = Donante, y = ALB, color = Category,xlab = "", ylab = "ALB") +
+  geom_jitter() +
+  theme(legend.position = "none")
+
+ggplot(s) +
+  aes(x = Donante, y = ALP, color = Category,xlab = "", ylab = "ALP") +
+  geom_jitter() +
+  theme(legend.position = "none")
+
+ggplot(s) +
+  aes(x = Donante, y = ALT, color = Category,xlab = "", ylab = "ALT") +
+  geom_jitter() +
+  theme(legend.position = "none")
+
+ggplot(s) +
+  aes(x = Donante, y = AST, color = Category,xlab = "", ylab = "AST") +
+  geom_jitter() +
+  theme(legend.position = "none")
+
+ggplot(s) +
+  aes(x = Donante, y = BIL, color = Category,xlab = "", ylab = "BIL") +
+  geom_jitter() +
+  theme(legend.position = "none")
+
+ggplot(s) +
+  aes(x = Donante, y = CHE, color = Category,xlab = "", ylab = "CHE") +
+  geom_jitter() +
+  theme(legend.position = "none")
+
+ggplot(s) +
+  aes(x = Donante, y = CHOL, color = Category,xlab = "", ylab = "CHOL") +
+  geom_jitter() +
+  theme(legend.position = "none")
+
+ggplot(s) +
+  aes(x = Donante, y = CREA, color = Category,xlab = "", ylab = "CREA") +
+  geom_jitter() +
+  theme(legend.position = "none")
+
+ggplot(s) +
+  aes(x = Donante, y = GGT, color = Category,xlab = "", ylab = "GGT") +
+  geom_jitter() +
+  theme(legend.position = "none")
+
+ggplot(s) +
+  aes(x = Donante, y = PROT, color = Category,xlab = "", ylab = "PROT") +
+  geom_jitter() 
+```
+
+Ver como estan distribuidas las variables, respecto con la edad
+```{r}
+ggplot(s, aes(x=Age, y=ALB, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=ALP, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=ALT, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=AST, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=BIL, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=CHE, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=CHOL, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=CREA, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=GGT, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=PROT, color=Category)) + geom_point() + NULL
+
+```
+
+```{r}
+ggplot(s, aes(x=Age, y=ALB, color=Donante)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=ALP, color=Donante)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=ALT, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=AST, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=BIL, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=CHE, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=CHOL, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=CREA, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=GGT, color=Category)) + geom_point() + NULL
+ggplot(s, aes(x=Age, y=PROT, color=Category)) + geom_point() + NULL
+
+```
+
+```{r}
+ggplot(s, aes(x=ALB, y=Donante , fill=Donante)) +
+  ggridges::stat_density_ridges(
+    quantile_lines=T, quantiles=c(.25,.5,.75), alpha=0.7) +
+  NULL
+
+ggplot(s, aes(x=ALP, y=Donante , fill=Donante)) +
+  ggridges::stat_density_ridges(
+    quantile_lines=T, quantiles=c(.25,.5,.75), alpha=0.7) +
+  NULL
+
+ggplot(s, aes(x=ALT, y=Donante , fill=Donante)) +
+  ggridges::stat_density_ridges(
+    quantile_lines=T, quantiles=c(.25,.5,.75), alpha=0.7) +
+  NULL
+
+ggplot(s, aes(x=AST, y=Donante , fill=Donante)) +
+  ggridges::stat_density_ridges(
+    quantile_lines=T, quantiles=c(.25,.5,.75), alpha=0.7) +
+  NULL
+
+ggplot(s, aes(x=BIL, y=Donante , fill=Donante)) +
+  ggridges::stat_density_ridges(
+    quantile_lines=T, quantiles=c(.25,.5,.75), alpha=0.7) +
+  NULL
+
+ggplot(s, aes(x=CHE, y=Donante , fill=Donante)) +
+  ggridges::stat_density_ridges(
+    quantile_lines=T, quantiles=c(.25,.5,.75), alpha=0.7) +
+  NULL
+
+ggplot(s, aes(x=CHOL, y=Donante , fill=Donante)) +
+  ggridges::stat_density_ridges(
+    quantile_lines=T, quantiles=c(.25,.5,.75), alpha=0.7) +
+  NULL
+
+ggplot(s, aes(x=CREA, y=Donante , fill=Donante)) +
+  ggridges::stat_density_ridges(
+    quantile_lines=T, quantiles=c(.25,.5,.75), alpha=0.7) +
+  NULL
+
+ggplot(s, aes(x=GGT, y=Donante , fill=Donante)) +
+  ggridges::stat_density_ridges(
+    quantile_lines=T, quantiles=c(.25,.5,.75), alpha=0.7) +
+  NULL
+
+ggplot(s, aes(x=PROT, y=Donante , fill=Donante)) +
+  ggridges::stat_density_ridges(
+    quantile_lines=T, quantiles=c(.25,.5,.75), alpha=0.7) +
+  NULL
+```
+
+Comparar como son las distribuciones en cada categoria:
+
+```{r}
+library(plotly)
+```
+
+```{r}
+gg =  ggplot(data = s ) +  
+  geom_histogram(aes(x= ALB, fill=Category),bins = 29, alpha = 0.7) 
+ggplotly(gg)%>% 
+  layout(plot_bgcolor='#e5ecf6',   
+             xaxis = list(   
+               title='ALB', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'),   
+             yaxis = list(   
+               title='Cantidad', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff')) 
+
+```
+
+```{r}
+gg =  ggplot(data = s ) +  
+  geom_histogram(aes(x= ALP, fill=Category),bins = 29, alpha = 0.7) 
+ggplotly(gg)%>% 
+  layout(plot_bgcolor='#e5ecf6',   
+             xaxis = list(   
+               title='ALP', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'),   
+             yaxis = list(   
+               title='Cantidad', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'))
+
+```
+
+```{r}
+gg =  ggplot(data = s ) +  
+  geom_histogram(aes(x= ALT, fill=Category),bins = 29, alpha = 0.7) 
+ggplotly(gg)%>% 
+  layout(plot_bgcolor='#e5ecf6',   
+             xaxis = list(   
+               title='ALT', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'),   
+             yaxis = list(   
+               title='Cantidad', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'))
+```
+
+```{r}
+gg =  ggplot(data = s ) +  
+  geom_histogram(aes(x= AST, fill=Category),bins = 29, alpha = 0.7) 
+ggplotly(gg)%>% 
+  layout(plot_bgcolor='#e5ecf6',   
+             xaxis = list(   
+               title='AST', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'),   
+             yaxis = list(   
+               title='Cantidad', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'))
+```
+
+```{r}
+gg =  ggplot(data = s ) +  
+  geom_histogram(aes(x= BIL, fill=Category),bins = 29, alpha = 0.7) 
+ggplotly(gg)%>% 
+  layout(plot_bgcolor='#e5ecf6',   
+             xaxis = list(   
+               title='BIL', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'),   
+             yaxis = list(   
+               title='Cantidad', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'))
+```
+
+```{r}
+gg =  ggplot(data = s ) +  
+  geom_histogram(aes(x= CHE, fill=Category),bins = 29, alpha = 0.7) 
+ggplotly(gg)%>% 
+  layout(plot_bgcolor='#e5ecf6',   
+             xaxis = list(   
+               title='CHE', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'),   
+             yaxis = list(   
+               title='Cantidad', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'))
+```
+
+```{r}
+gg =  ggplot(data = s ) +  
+  geom_histogram(aes(x= CHOL, fill=Category),bins = 29, alpha = 0.7) 
+ggplotly(gg)%>% 
+  layout(plot_bgcolor='#e5ecf6',   
+             xaxis = list(   
+               title='CHOL', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'),   
+             yaxis = list(   
+               title='Cantidad', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'))
+```
+
+```{r}
+gg =  ggplot(data = s ) +  
+  geom_histogram(aes(x= CREA, fill=Category),bins = 29, alpha = 0.7) 
+ggplotly(gg)%>% 
+  layout(plot_bgcolor='#e5ecf6',   
+             xaxis = list(   
+               title='CREA', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'),   
+             yaxis = list(   
+               title='Cantidad', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'))
+```
+
+```{r}
+gg =  ggplot(data = s ) +  
+  geom_histogram(aes(x= GGT, fill=Category),bins = 29, alpha = 0.7) 
+ggplotly(gg)%>% 
+  layout(plot_bgcolor='#e5ecf6',   
+             xaxis = list(   
+               title='GGT', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'),   
+             yaxis = list(   
+               title='Cantidad', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'))
+```
+
+```{r}
+gg =  ggplot(data = s ) +  
+  geom_histogram(aes(x= PROT, fill=Category),bins = 29, alpha = 0.7) 
+ggplotly(gg)%>% 
+  layout(plot_bgcolor='#e5ecf6',   
+             xaxis = list(   
+               title='PROT', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'),   
+             yaxis = list(   
+               title='Cantidad', 
+               zerolinecolor = '#ffff',   
+               zerolinewidth = 2,   
+               gridcolor = 'ffff'))
+```
+
+------------------------------------------------------------------
+CORRELACION 
+
+```{r}
+library(tidyverse)
+library(hexbin)
+library(energy)
+library(dHSIC)
+library(sjstats)
+library(rstatix)
+library(ggpubr)
+library(rstatix)
+```
+
+
+```{r}
+install.packages("pwr")
+library(pwr)
+```
+
+ANOVA: la correlación entre todas las variables cuantitativas con la variable cualitativa
+
+```{r}
+anova_res = aov(ALB ~ Donante, s)
+anova_tab = anova_res %>% sjstats::anova_stats() 
+anova_tab$omegasq[1]
+```
+
+```{r}
+anova_res = aov(ALP ~ Donante, s)
+anova_tab = anova_res %>% sjstats::anova_stats() 
+anova_tab$omegasq[1]
+```
+
+```{r}
+anova_res = aov(ALT ~ Donante, s)
+anova_tab = anova_res %>% sjstats::anova_stats() 
+anova_tab$omegasq[1]
+```
+
+```{r}
+anova_res = aov(AST ~ Donante, s)
+anova_tab = anova_res %>% sjstats::anova_stats() 
+anova_tab$omegasq[1]
+```
+
+```{r}
+anova_res = aov(BIL ~ Donante, s)
+anova_tab = anova_res %>% sjstats::anova_stats() 
+anova_tab$omegasq[1]
+```
+
+```{r}
+anova_res = aov(CHE ~ Donante, s)
+anova_tab = anova_res %>% sjstats::anova_stats() 
+anova_tab$omegasq[1]
+```
+
+```{r}
+anova_res = aov(CHOL ~ Donante, s)
+anova_tab = anova_res %>% sjstats::anova_stats() 
+anova_tab$omegasq[1]
+```
+
+```{r}
+anova_res = aov(CREA ~ Donante, s)
+anova_tab = anova_res %>% sjstats::anova_stats() 
+anova_tab$omegasq[1]
+```
+
+```{r}
+anova_res = aov(GGT ~ Donante, s)
+anova_tab = anova_res %>% sjstats::anova_stats() 
+anova_tab$omegasq[1]
+```
+
+```{r}
+anova_res = aov(PROT ~ Donante, s)
+anova_tab = anova_res %>% sjstats::anova_stats() 
+anova_tab$omegasq[1]
+```
+
+Grafico Correlacion: Con un correlograma visualizamos la correlación entre todas las variables cuantitativas
+
+```{r}
+s1 = s
+s1$Age = NULL
+```
+
+```{r}
+GGally::ggcorr(
+  s1, method=c("pairwise","spearman"),  
+  label=T, hjust=1, label_size=2, layout.exp=10, size=3)
+```
+
+
+
+
+------------------------------------------------------------------
+TEST - TRAIN
+
+```{r}
+s2 = s
+```
+
+```{r}
+s2$Sex = NULL
+s2$Age = NULL
+s2$Category= as.factor(s2$Category)
+s2$Donante = as.factor(s2$Donante)
+s2$ALB=as.factor(s2$ALB)
+s2$ALP=as.factor(s2$ALP)
+s2$ALT=as.factor(s2$ALT)
+s2$AST=as.factor(s2$AST)
+s2$BIL=as.factor(s2$BIL)
+s2$CHE=as.factor(s2$CHE)
+s2$CHOL=as.factor(s2$CHOL)
+s2$CREA=as.factor(s2$CREA)
+s2$GGT=as.factor(s2$GGT)
+s2$PROT=as.factor(s2$PROT)
+```
+
+Stratified split: permite que se conserven todas las clases con seguridad.
+
+```{r}
+#Particionar la base en entrenamiento y testeo
+library(caret)
+set.seed(8);particion=createDataPartition(y=s2$Donante,p=0.75, list=F)
+
+entreno = s2[particion,] 
+testeo = s2[-particion,]
+```
+
+```{r}
+View(entreno)
+View(testeo)
+```
+
+
+```{r}
+#Creacion modelo
+library(rpart)
+arbol = rpart(Donante ~.,entreno,method = "class")
+```
+
+```{r}
+#Graficar el arbol
+library(rpart.plot)
+rpart.plot(arbol, extra = 1, type=5, main= "Arbol de Decision")
+```
+
+```{r}
+summary(entreno) 
+
+```
+
+```{r}
+#Testear el modelo. Sirve el arbol?
+pred = predict(arbol, testeo, type="class")
+confusionMatrix(pred,testeo$Donante)
+```
