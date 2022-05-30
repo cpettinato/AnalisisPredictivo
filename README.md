@@ -8,3 +8,8 @@
 
 - [Codigo R](https://github.com/cpettinato/AnalisisPredictivo/blob/main/Examen%201%20-%20Pettinato.Rmd)
 
+## Examen 2 
+
+- [Presentación](https://docs.google.com/presentation/d/1lo-xjvURgXOeT5hDcwrkhbplxAzKeBwu/edit?usp=sharing&ouid=101068290472041686714&rtpof=true&sd=true)
+
+- [Codigo Python]()
