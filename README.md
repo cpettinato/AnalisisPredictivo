@@ -10,6 +10,8 @@
 
 ## Examen 2 
 
+- [Competencia Kaggle](https://www.kaggle.com/competitions/ap-2022q1/leaderboard)
+
 - [Presentación](https://docs.google.com/presentation/d/1lo-xjvURgXOeT5hDcwrkhbplxAzKeBwu/edit?usp=sharing&ouid=101068290472041686714&rtpof=true&sd=true)
 
 - [Codigo Python](https://github.com/cpettinato/AnalisisPredictivo/blob/main/Examen2-Pettinato.ipynb)
