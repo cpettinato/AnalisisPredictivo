@@ -24,4 +24,4 @@
 
 - [EDA (R)]()
 
-- [Modelo (Python)](Final - Pettinato (Modelos).ipynb)
+- [Modelo (Python)](https://github.com/cpettinato/AnalisisPredictivo/blob/ad28dc0661e70a0b11718b8b8c1158edfa4d3a0e/Final%20-%20Pettinato%20(Modelos).ipynb)
