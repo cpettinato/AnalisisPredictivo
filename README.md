@@ -24,4 +24,4 @@
 
 - [EDA (R)]()
 
-- [Modelo (Python)]()
+- [Modelo (Python)](Final - Pettinato (Modelos).ipynb)
