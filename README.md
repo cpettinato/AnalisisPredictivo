@@ -22,6 +22,6 @@
 
 - [Presentación](https://docs.google.com/presentation/d/1UKqIOTgV_lD6qCzolmDKBnB2EoRllDPh/edit?usp=sharing&ouid=101068290472041686714&rtpof=true&sd=true)
 
-- [EDA (R)]()
+- [EDA (R)](https://github.com/cpettinato/AnalisisPredictivo/blob/65cf8647b8b190178dbfbbc065989019b524876a/Final%20-%20Pettinato%20(EDA).R)
 
 - [Modelo (Python)](https://github.com/cpettinato/AnalisisPredictivo/blob/main/Final%20-%20Pettinato%20(Modelos).ipynb)
